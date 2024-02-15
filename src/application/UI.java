@@ -52,17 +52,26 @@ public class UI {
 		}
 	}
 	
-	public static void printMatch(ChessMatch chessmatch, List<ChessPiece> captured) {
-		printBoard(chessmatch.getPieces());
+	public static void printMatch(ChessMatch chessMatch, List<ChessPiece> captured) {
+		printBoard(chessMatch.getPieces());
 		System.out.println();
 		printCapturedPieces(captured);
 		System.out.println();
-		System.out.println("Turn: " + chessmatch.getTurn());
-		System.out.println("Waiting: " + chessmatch.getCurrentPlayer());
-		
-		if(chessmatch.getCheck()) {
-			System.out.println("CHECK!");
+		System.out.println("Turn: " + chessMatch.getTurn());
+		if(!chessMatch.getCheckMate()) {
+			System.out.println("Waiting: " + chessMatch.getCurrentPlayer());
+			
+			if(chessMatch.getCheck()) {
+				System.out.println("CHECK!");
+			}
+			
+		} else {
+			System.out.println("CHECKMATE!");
+			System.out.println("Winner: " + chessMatch.getCurrentPlayer());
 		}
+		
+		
+		
 	}
 
 	public static void printBoard(ChessPiece[][] pieces) {

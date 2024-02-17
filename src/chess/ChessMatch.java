@@ -1,5 +1,6 @@
 package chess;
 
+import java.security.InvalidParameterException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -22,6 +23,7 @@ public class ChessMatch {
 	private boolean check;
 	private boolean checkMate;
 	private ChessPiece enPassantVulnerable;
+	private ChessPiece promotion;
 	
 	private List<Piece> piecesOnTheBoard = new ArrayList<>();
 	private List<Piece> capturedPieces = new ArrayList<>();
@@ -51,6 +53,10 @@ public class ChessMatch {
 	
 	public ChessPiece getEnPassantVulnerable() {
 		return enPassantVulnerable;
+	}
+	
+	public ChessPiece getPromotion() {
+		return promotion;
 	}
 
 	public ChessPiece[][] getPieces() {
@@ -193,6 +199,15 @@ public class ChessMatch {
 		
 		ChessPiece movedPiece = (ChessPiece)board.piece(target);
 		
+		// Specialmove: Promotion
+		promotion = null;
+		if(movedPiece instanceof Pawn) {
+			if((movedPiece.getColor() == Color.WHITE && target.getRow() == 0) || (movedPiece.getColor() == Color.BLACK && target.getRow() == 7)) {
+				promotion = (ChessPiece)board.piece(target);
+			}
+			
+		}
+		
 		check = (testCheck(opponent(currentPlayer))) ? true : false;
 		
 		if(testCheckMate(opponent(currentPlayer))) {
@@ -212,6 +227,34 @@ public class ChessMatch {
 		
 		return (ChessPiece)capturedPiece;
 		
+	}
+	
+	public ChessPiece replacePromotedPiece(String type) {
+		if(promotion == null) {
+			throw new IllegalStateException("There is no piece to be promoted.");
+		}
+		
+		if(!type.equals("N") && !type.equals("B") && !type.equals("Q") && !type.equals("R")) {
+			throw new InvalidParameterException("Invalid type for promotion.");
+		}
+		
+		Position positionPiece = promotion.getChessPosition().toPosition();
+		Piece piece = board.removePiece(positionPiece);
+		piecesOnTheBoard.remove(piece);
+		
+		ChessPiece newPiece = newPiece(type, promotion.getColor());
+		board.placePiece(newPiece, positionPiece);
+		piecesOnTheBoard.add(newPiece);
+		
+		return newPiece;
+		
+	}
+	
+	private ChessPiece newPiece(String type, Color color) {
+		if(type.equals("B")) return new Bishop(board, color);
+		if(type.equals("Q")) return new Queen(board, color);
+		if(type.equals("R")) return new Rook(board, color);
+		return new Knight(board, color);
 	}
 	
 	private void nextTurn() {
